@@ -363,7 +363,7 @@ def image_kmeans(episode):
     # tf_idf_dict = dict(sorted(tf_idf_dict.values() reverse=True)[:5])
     # print('tf_idf_dict:', tf_idf_dict)
     ht_list = heapq.nlargest(5, tf_idf_dict, key=tf_idf_dict.get)
-    print("ht_list: ", ht_list)
+    # print("ht_list: ", ht_list)
     # print(heapq.nlargest(5, tf_idf_dict, key=tf_idf_dict.get))
     # print('ht_list:', ht_list)
 
@@ -618,8 +618,8 @@ if __name__ == '__main__':
 
     episodes = []
     colors = []
-
-    for t in title_ep_dict.keys():
+    keys = sorted(title_ep_dict.keys())
+    for t in keys[keys.index('MEMORIST'):]:
         if (color_db is not None) and (color_db.get(t) is None):
             print("title:", t)
             for e in title_ep_dict.get(t):
