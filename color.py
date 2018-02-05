@@ -389,7 +389,7 @@ def image_kmeans(episode):
 
     # print("result_combi_list: ", result_combi_list)
 
-    combi_tf_idf_dict = dict(zip(result_combi_list, combi_tf_idf_list))
+    # combi_tf_idf_dict = dict(zip(result_combi_list, combi_tf_idf_list))
     # print("combi_tf_idf_dict:", combi_tf_idf_dict)
     # plt.axis("off")
     # plt.imshow(bar)
@@ -429,6 +429,7 @@ def data_to_json(episode, result_combi_list, tf_idf_list):
     color_info_list = list()
     color_info_list.append(str(episode))
     for i in range(0, len(result_combi_list)):
+        isUnique = True
         color_info = {
             'keyword': result_combi_list[i].keyword,
             'image': result_combi_list[i].image,
@@ -436,9 +437,22 @@ def data_to_json(episode, result_combi_list, tf_idf_list):
             'color2': result_combi_list[i].color2,
             'color3': result_combi_list[i].color3,
             'tf-idf': round(tf_idf_list[i], 2)
-
         }
-        color_info_list.append(color_info)
+        if len(color_info_list) is not 0:
+            for j in range(0, len(color_info_list)):
+                if color_info_list[j].get('color1') == result_combi_list[i].color1 and color_info_list[j].get('color2') == result_combi_list[i].color2 and color_info_list[j].get('color3') == result_combi_list[i].color3:
+                    isUnique = False
+                    color_info = {
+                        'keyword': result_combi_list[i].keyword,
+                        'image': result_combi_list[i].image,
+                        'color1': result_combi_list[i].color1,
+                        'color2': result_combi_list[i].color2,
+                        'color3': result_combi_list[i].color3,
+                        'tf-idf': color_info_list[j].get('tf-idf') + round(tf_idf_list[i], 2)
+                    }
+                    color_info_list[j] = color_info
+        if isUnique:
+            color_info_list.append(color_info)
         # jsonString = json.dumps(webtoon_result, ensure_ascii=False)
         # print("color_info: ", color_info)
         # print("jsonStringType: ", type(jsonString))
