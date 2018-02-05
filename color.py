@@ -439,7 +439,12 @@ def data_to_json(episode, result_combi_list, tf_idf_list):
             'tf-idf': round(tf_idf_list[i], 2)
         }
         if len(color_info_list) is not 0:
-            for j in range(0, len(color_info_list)):
+
+            for j in range(1, len(color_info_list)):
+                # print('color_info_list[j]:', color_info_list[j])
+                # print('color_info_list[j]:', color_info_list[j].color1)
+                # print('color_info_list[j]:', color_info_list[j].keyword)
+                # print('color_info_list[j]:', color_info_list[j]['keyword'])
                 if color_info_list[j].get('color1') == result_combi_list[i].color1 and color_info_list[j].get('color2') == result_combi_list[i].color2 and color_info_list[j].get('color3') == result_combi_list[i].color3:
                     isUnique = False
                     color_info = {
