@@ -345,7 +345,7 @@ def plot_colors2(hist, centroids):
     return bar, top_ten_list
 
 
-def image_kmeans(episode):
+def get_lists(episode):
     result_combi_list = []
     tf_idf_list = []
 
@@ -425,7 +425,7 @@ def make_rgb_object(top_ten_list):
     return top_ten_rgb
 
 
-def data_to_json(episode, result_combi_list, tf_idf_list):
+def data_to_json(episode, result_combi_list, tf_idf_list, xy_dict):
     color_info_list = list()
     color_info_list.append(str(episode))
     for i in range(0, len(result_combi_list)):
@@ -436,7 +436,9 @@ def data_to_json(episode, result_combi_list, tf_idf_list):
             'color1': result_combi_list[i].color1,
             'color2': result_combi_list[i].color2,
             'color3': result_combi_list[i].color3,
-            'tf-idf': round(tf_idf_list[i], 2)
+            'tf-idf': round(tf_idf_list[i], 2),
+            'x': xy_dict.get(result_combi_list[i].image).get('x'),
+            'y': xy_dict.get(result_combi_list[i].image).get('y')
         }
         if len(color_info_list) is not 0:
 
@@ -453,7 +455,9 @@ def data_to_json(episode, result_combi_list, tf_idf_list):
                         'color1': result_combi_list[i].color1,
                         'color2': result_combi_list[i].color2,
                         'color3': result_combi_list[i].color3,
-                        'tf-idf': color_info_list[j].get('tf-idf') + round(tf_idf_list[i], 2)
+                        'tf-idf': color_info_list[j].get('tf-idf') + round(tf_idf_list[i], 2),
+                        'x': xy_dict.get(result_combi_list[i].image).get('x'),
+                        'y': xy_dict.get(result_combi_list[i].image).get('y')
                     }
                     color_info_list[j] = color_info
         if isUnique:
@@ -462,6 +466,21 @@ def data_to_json(episode, result_combi_list, tf_idf_list):
         # print("color_info: ", color_info)
         # print("jsonStringType: ", type(jsonString))
     return color_info_list
+
+
+def get_xy_dict():
+    xy_csv = pd.read_csv("xy.csv")
+    image_list = xy_csv['image']
+    x_list = xy_csv['x']
+
+    y_list = xy_csv['y']
+
+    xy_list = []
+    for i in range(0, 177):
+        temp = {'x': x_list[i], 'y': y_list[i]}
+        xy_list.append(temp)
+
+    return dict(zip(image_list, xy_list))
 
 
 def get_dict_from_csv():
@@ -615,7 +634,7 @@ if __name__ == '__main__':
     title_ep_dict = get_dict_from_csv()
 
     color_db = firebase.get('/result', None)
-
+    xy_dict = get_xy_dict()
     episodes = []
     colors = []
     keys = sorted(title_ep_dict.keys())
@@ -626,10 +645,10 @@ if __name__ == '__main__':
                 print('episode:', e)
                 # print('episode:', e)
                 # print(e_dict.get(e))
-                result_list, idf_list = image_kmeans(title_ep_dict.get(t).get(e))
+                result_list, idf_list = get_lists(title_ep_dict.get(t).get(e))
                 # print('result_list:', result_list)
                 # print('ratio_list:', idf_list)
-                json = data_to_json(e, result_list, idf_list)
+                json = data_to_json(e, result_list, idf_list, xy_dict)
                 # result = {
                 #     str(e): json
                 # }

@@ -637,8 +637,8 @@ if __name__ == '__main__':
     xy_dict = get_xy_dict()
     episodes = []
     colors = []
-
-    for t in title_ep_dict.keys():
+    keys = sorted(title_ep_dict.keys())
+    for t in keys[keys.index('ikki'):]:
         if (color_db is not None) and (color_db.get(t) is None):
             print("title:", t)
             for e in title_ep_dict.get(t):
@@ -658,8 +658,6 @@ if __name__ == '__main__':
                 firebase.put('/result', t, colors)
             colors.clear()
     print("finished")
-
-
     # t = 'MEMORIST'
     # print("title:", t)
     # for e in title_ep_dict.get(t):
