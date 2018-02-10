@@ -363,13 +363,13 @@ def get_lists(episode):
     # tf_idf_dict = dict(sorted(tf_idf_dict.values() reverse=True)[:5])
     # print('tf_idf_dict:', tf_idf_dict)
     top5 = heapq.nlargest(5, tf_idf_dict, key=tf_idf_dict.get)
-    print('len(top5):', len(top5))
+    # print('len(top5):', len(top5))
     if len(top5) < 3:
         for i in range(0, 3-len(top5)):
             top5.append(top5[i])
 
     ht_list = top5
-    print('top5:', top5)
+    # print('top5:', top5)
     # print("ht_list: ", ht_list)
     # print(heapq.nlargest(5, tf_idf_dict, key=tf_idf_dict.get))
     # print('ht_list:', ht_list)
@@ -551,20 +551,20 @@ def get_dict_from_csv():
         if i != len(title) - 1 and title[i] != title[i + 1]:
             e_list.append(e_count)
             title_list.append(title[i])
-            print("[e: " + str(title[i]) + "]: " + str(e_count))
+            # print("[e: " + str(title[i]) + "]: " + str(e_count))
             e_count = 0
 
         if i == len(title) - 1:
-            print('i == len(title)')
+            # print('i == len(title)')
             e_count += 1
             count_list.append(count)
             e_list.append(e_count)
             title_list.append(title[i])
 
     # print("count_list: ", count_list)
-    print("e_list: ", e_list)
-    print("title_list:", title_list)
-    print('test:', dict(zip(title_list, e_list)))
+    # print("e_list: ", e_list)
+    # print("title_list:", title_list)
+    # print('test:', dict(zip(title_list, e_list)))
 
     for ht in ht_num:
         ht_list.append(ht)
@@ -574,7 +574,7 @@ def get_dict_from_csv():
         idf_list.append(sum(tf_dummy[ht]) / len(uniq_episode_id))
 
     idf_dict = dict(zip(ht_list, idf_list))
-    print("idf_dict: ", idf_dict)
+    # print("idf_dict: ", idf_dict)
 
     result_csv = open('result.csv', 'w', encoding='utf-8')
     result_csv.write(' ')
@@ -615,10 +615,10 @@ def get_dict_from_csv():
 
     ec = 0
     j = 0
-    print('e_list:', e_list)
-    print('existing_ep:', existing_ep)
-    print('len(color_tf_dict_list): ', len(color_tf_dict_list), len(uniq_episode_id), sum(e_list))
-    print('existing_ep:', sum(existing_ep))
+    # print('e_list:', e_list)
+    # print('existing_ep:', existing_ep)
+    # print('len(color_tf_dict_list): ', len(color_tf_dict_list), len(uniq_episode_id), sum(e_list))
+    # print('existing_ep:', sum(existing_ep))
 ################################ 버그 : e_list(6452)랑 uniq_episode_id(6170)랑 길이가 다름
 
     ec_dict_list = []
@@ -626,9 +626,9 @@ def get_dict_from_csv():
         j += 1
         c_temp_list.append(color_tf_dict_list[i])
         e_temp_list.append(uniq_episode_id[i])
-        print('[' + str(i) + ']' + str(uniq_episode_id[i]))
+        # print('[' + str(i) + ']' + str(uniq_episode_id[i]))
         if (j - 1) == e_list[ec] - 1:
-            print('위:', uniq_title[ec])
+            # print('위:', uniq_title[ec])
             temp_dict = dict(zip(e_temp_list, c_temp_list))
             ec_dict_list.append(temp_dict)
             c_temp_list.clear()
