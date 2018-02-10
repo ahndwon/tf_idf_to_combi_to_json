@@ -352,7 +352,7 @@ def get_lists(episode):
     # bar = np.zeros((50, 300, 3), dtype="uint8")
     ht_list = []
     for c in episode:
-        ht_list.append(c. get('color'))
+        ht_list.append(c.get('color'))
 
     for ti in episode:
         tf_idf_list.append(ti.get('tf-idf'))
@@ -362,7 +362,14 @@ def get_lists(episode):
     # print('sorted:', sorted(tf_idf_dict.values(), reverse=True)[:5])
     # tf_idf_dict = dict(sorted(tf_idf_dict.values() reverse=True)[:5])
     # print('tf_idf_dict:', tf_idf_dict)
-    ht_list = heapq.nlargest(5, tf_idf_dict, key=tf_idf_dict.get)
+    top5 = heapq.nlargest(5, tf_idf_dict, key=tf_idf_dict.get)
+    print('len(top5):', len(top5))
+    if len(top5) < 3:
+        for i in range(0, 3-len(top5)):
+            top5.append(top5[i])
+
+    ht_list = top5
+    print('top5:', top5)
     # print("ht_list: ", ht_list)
     # print(heapq.nlargest(5, tf_idf_dict, key=tf_idf_dict.get))
     # print('ht_list:', ht_list)
@@ -427,7 +434,7 @@ def make_rgb_object(top_ten_list):
 
 def data_to_json(episode, result_combi_list, tf_idf_list, xy_dict):
     color_info_list = list()
-    color_info_list.append(str(episode))
+    # color_info_list.append(str(episode))
     for i in range(0, len(result_combi_list)):
         isUnique = True
         color_info = {
@@ -437,8 +444,8 @@ def data_to_json(episode, result_combi_list, tf_idf_list, xy_dict):
             'color2': result_combi_list[i].color2,
             'color3': result_combi_list[i].color3,
             'tf-idf': round(tf_idf_list[i], 2),
-            'x': xy_dict.get(result_combi_list[i].image).get('x'),
-            'y': xy_dict.get(result_combi_list[i].image).get('y')
+            'x': str(xy_dict.get(result_combi_list[i].image).get('x')),
+            'y': str(xy_dict.get(result_combi_list[i].image).get('y'))
         }
         if len(color_info_list) is not 0:
 
@@ -456,8 +463,8 @@ def data_to_json(episode, result_combi_list, tf_idf_list, xy_dict):
                         'color2': result_combi_list[i].color2,
                         'color3': result_combi_list[i].color3,
                         'tf-idf': color_info_list[j].get('tf-idf') + round(tf_idf_list[i], 2),
-                        'x': xy_dict.get(result_combi_list[i].image).get('x'),
-                        'y': xy_dict.get(result_combi_list[i].image).get('y')
+                        'x': str(xy_dict.get(result_combi_list[i].image).get('x')),
+                        'y': str(xy_dict.get(result_combi_list[i].image).get('y'))
                     }
                     color_info_list[j] = color_info
         if isUnique:
@@ -497,7 +504,7 @@ def get_dict_from_csv():
     font_name = "AppleGothic"
     rc('font', family=font_name)
 
-    json_csv = pd.read_csv("json.csv")
+    json_csv = pd.read_csv("json3.csv")
     uniq_title = pd.unique(json_csv['title'])
     title = json_csv['title']
     episode_id = json_csv["episode_id"]
@@ -514,11 +521,13 @@ def get_dict_from_csv():
     # 더미행렬 -> 희소행렬
     # print(dummy)
 
+    # print('title:', title)
+    # title.to_csv('title.csv')
+
     for ht, e_id, ratio in zip(json_csv["hue & tone"], json_csv["episode_id"], json_csv["ratio"]):
         tf_dummy.ix[(e_id, ht)] += ratio
 
     # print(tf_dummy)
-
     idf_list = []
     ht_list = []
     title_list = []
@@ -528,7 +537,7 @@ def get_dict_from_csv():
     e_list = []
 
     # title count
-
+    start = 0
     count = 0
     for i in range(0, len(title)):
         count += 1
@@ -542,13 +551,20 @@ def get_dict_from_csv():
         if i != len(title) - 1 and title[i] != title[i + 1]:
             e_list.append(e_count)
             title_list.append(title[i])
-            # print("[e: " + str(title[i]) + "]: " + str(e_count))
+            print("[e: " + str(title[i]) + "]: " + str(e_count))
             e_count = 0
 
-    #
+        if i == len(title) - 1:
+            print('i == len(title)')
+            e_count += 1
+            count_list.append(count)
+            e_list.append(e_count)
+            title_list.append(title[i])
+
     # print("count_list: ", count_list)
-    # print("e_list: ", e_list)
-    # print("title_list:", title_list)
+    print("e_list: ", e_list)
+    print("title_list:", title_list)
+    print('test:', dict(zip(title_list, e_list)))
 
     for ht in ht_num:
         ht_list.append(ht)
@@ -558,7 +574,7 @@ def get_dict_from_csv():
         idf_list.append(sum(tf_dummy[ht]) / len(uniq_episode_id))
 
     idf_dict = dict(zip(ht_list, idf_list))
-    # print("idf_dict: ", idf_dict)
+    print("idf_dict: ", idf_dict)
 
     result_csv = open('result.csv', 'w', encoding='utf-8')
     result_csv.write(' ')
@@ -568,21 +584,30 @@ def get_dict_from_csv():
     result_csv.close()
 
     for ht, e_id, ratio in zip(json_csv["hue & tone"], json_csv["episode_id"], json_csv["ratio"]):
-        tf_idf_dummy.ix[(e_id, ht)] = ratio / idf_dict[ht]
+        if idf_dict[ht] != 0:
+            tf_idf_dummy.ix[(e_id, ht)] += ratio / idf_dict[ht]
+
+
+    # for e_id in json_csv["episode_id"]:
 
     # print(tf_idf_dummy)
     # tf_idf_dummy.to_csv('test.csv')
-    list2 = []  #
-    dict_list = []
-
+    color_tf_dict_list = []  #
+    e_count = 0
+    existing_ep = []
     for e_id in uniq_episode_id:
         temp_list = []
         for ht in ht_num:
             if tf_idf_dummy[ht][e_id] != 0:
                 # print(e_id, ht, tf_idf_dummy[ht][e_id])
                 temp_list.append({'color': ht, 'tf-idf': math.log(tf_idf_dummy[ht][e_id])})
+        #         e_count += 1
+        # existing_ep.append(e_count)
+        # e_count = 0
+
+
         # print("temp_list:", temp_list)
-        list2.append(temp_list)
+        color_tf_dict_list.append(temp_list)
 
     # print("list2:", list2)
     c_temp_list = []
@@ -590,14 +615,20 @@ def get_dict_from_csv():
 
     ec = 0
     j = 0
+    print('e_list:', e_list)
+    print('existing_ep:', existing_ep)
+    print('len(color_tf_dict_list): ', len(color_tf_dict_list), len(uniq_episode_id), sum(e_list))
+    print('existing_ep:', sum(existing_ep))
+################################ 버그 : e_list(6452)랑 uniq_episode_id(6170)랑 길이가 다름
 
     ec_dict_list = []
-    for i in range(len(list2)):
+    for i in range(len(color_tf_dict_list)):
         j += 1
-        c_temp_list.append(list2[i])
+        c_temp_list.append(color_tf_dict_list[i])
         e_temp_list.append(uniq_episode_id[i])
-        # print('[' + str(i) + ']' + str(list2[i]))
-        if j == e_list[ec]:
+        print('[' + str(i) + ']' + str(uniq_episode_id[i]))
+        if (j - 1) == e_list[ec] - 1:
+            print('위:', uniq_title[ec])
             temp_dict = dict(zip(e_temp_list, c_temp_list))
             ec_dict_list.append(temp_dict)
             c_temp_list.clear()
@@ -605,10 +636,15 @@ def get_dict_from_csv():
             ec += 1
             j = 0
     # print("ec_dict:", ec_dict_list)
+    # print("ec_dict_list:", ec_dict_list)
 
     title_ep_dict = dict(zip(title_list, ec_dict_list))
     # print('title_ep_dict:', title_ep_dict)
 
+    # with open('test.txt', 'w') as file:
+    #     file.write(json.dumps(title_ep_dict))
+
+    # np.save('test.npy', title_ep_dict)
     # Term Document Matrix형식으로 변경
     TDM = tf_dummy.T
     # TDM = tf_idf_dummy.T
@@ -622,6 +658,7 @@ def get_dict_from_csv():
     # 내림차순 정렬
     # word_counter.sort_values().plot(kind='barh', title='voca counter')
     # plt.show()
+    # print(title_ep_dict)
     return title_ep_dict
 
 
@@ -631,14 +668,15 @@ if __name__ == '__main__':
     authentication = firebase.FirebaseAuthentication(SECRET, None, False, False)  # image_kmeans(e_dict.get(32022))
     firebase = firebase.FirebaseApplication(DSN, authentication)
 
+    # firebase.put('/analysis', 'test', 'data')
     title_ep_dict = get_dict_from_csv()
-
-    color_db = firebase.get('/result', None)
+    #
+    color_db = firebase.get('/analysis', None)
     xy_dict = get_xy_dict()
     episodes = []
     colors = []
     keys = sorted(title_ep_dict.keys())
-    for t in keys[keys.index('esquisse'):]:
+    for t in keys[keys.index('Triangle'):]:
         if (color_db is not None) and (color_db.get(t) is None):
             print("title:", t)
             for e in title_ep_dict.get(t):
@@ -649,29 +687,39 @@ if __name__ == '__main__':
                 # print('result_list:', result_list)
                 # print('ratio_list:', idf_list)
                 json = data_to_json(e, result_list, idf_list, xy_dict)
-                # result = {
-                #     str(e): json
-                # }
+                result = {
+                    str(e): json
+                }
                 colors.append(json)
                 # episodes.append(e.key())
             if (color_db is not None) and (color_db.get(t) is None):
-                firebase.put('/result', t, colors)
+                firebase.put('/analysis', t, colors)
+            else:
+                print(t + 'already exists')
             colors.clear()
-    print("finished")
-    # t = 'MEMORIST'
+
+    # t = 'dings'
     # print("title:", t)
     # for e in title_ep_dict.get(t):
     #     print('episode:', e)
     #     # print(e_dict.get(e))
-    #     result_list, idf_list = image_kmeans(title_ep_dict.get(t).get(e))
+    #     result_list, idf_list = get_lists(title_ep_dict.get(t).get(e))
     #     # print('result_list:', result_list)
     #     # print('ratio_list:', idf_list)
-    #     json = data_to_json(e, result_list, idf_list)
-    #     # result = {
-    #     #     str(e): json
-    #     # }
-    #     colors.append(json)
+    #     json = data_to_json(e, result_list, idf_list, xy_dict)
+    #     result = {
+    #         str(e): json
+    #     }
+    #     colors.append(result)
+    #     print(json)
     #     # episodes.append(e.key())
-    # firebase.put('/result', t, colors)
+    # if (color_db is not None) and (color_db.get(t) is None):
+    #     firebase.put('/analysis', t, colors)
+    #
+    # else:
+    #     print(t + 'already exists')
     # colors.clear()
-    # 할거 키 인덱스 수정 ( 테스트하기 )
+    #
+    print("finished")
+
+
