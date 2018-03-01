@@ -504,7 +504,7 @@ def get_dict_from_csv():
     font_name = "AppleGothic"
     rc('font', family=font_name)
 
-    json_csv = pd.read_csv("json3.csv")
+    json_csv = pd.read_csv("json4.csv")
     uniq_title = pd.unique(json_csv['title'])
     title = json_csv['title']
     episode_id = json_csv["episode_id"]
@@ -671,7 +671,7 @@ if __name__ == '__main__':
     # firebase.put('/analysis', 'test', 'data')
     title_ep_dict = get_dict_from_csv()
     #
-    color_db = firebase.get('/analysis', None)
+    color_db = firebase.get('/result2', None)
     xy_dict = get_xy_dict()
     episodes = []
     colors = []
@@ -690,10 +690,10 @@ if __name__ == '__main__':
                 result = {
                     str(e): json
                 }
-                colors.append(json)
+                colors.append(result)
                 # episodes.append(e.key())
             if (color_db is not None) and (color_db.get(t) is None):
-                firebase.put('/analysis', t, colors)
+                firebase.put('/result2', t, colors)
             else:
                 print(t + 'already exists')
             colors.clear()

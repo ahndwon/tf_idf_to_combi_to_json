@@ -35,50 +35,6 @@ class Combination:
         self.color3 = color3
 
 
-# 썸네일 색을 가장 비슷한 KS색으로 반환
-def ks_color(webtoon_color):
-    red = sRGBColor(255, 0, 0)
-    orange = sRGBColor(255, 127, 0)
-    yellow = sRGBColor(255, 212, 0)
-    yellow_green = sRGBColor(129, 193, 71)
-    green = sRGBColor(0, 128, 0)
-    blue_green = sRGBColor(0, 86, 102)
-    blue = sRGBColor(0, 103, 163)
-    blue_violet = sRGBColor(75, 0, 130)
-    purple = sRGBColor(139, 0, 255)
-    reddish_purple = sRGBColor(102, 0, 153)
-    pink = sRGBColor(255, 51, 153)
-    brown = sRGBColor(150, 75, 0)
-
-    white = sRGBColor(255, 255, 255)
-    gray = sRGBColor(128, 128, 128)
-    black = sRGBColor(0, 0, 0)
-    color_list = ["red", "orange", "yellow", "yellow_green", "green", "blue_green", "blue", "blue_violet",
-                  "purple", "reddish_purple", "pink", "brown", "white", "gray", "black"]
-    ks_list = [red, orange, yellow, yellow_green, green, blue_green, blue, blue_violet,
-               purple, reddish_purple, pink, brown, white, gray, black]
-
-    result_color = ""
-    result = (-1)
-
-    for i in range(0, len(ks_list)):
-        lab_webtoon_color = get_ht_hash(webtoon_color, LabColor)
-        lab_ks_color = get_ht_hash(ks_list[i], LabColor)
-        if result == (-1):
-            result = colormath.color_diff.delta_e_cie2000(lab_webtoon_color, lab_ks_color, 1, 1, 1)
-            print("result: ", result)
-            result_color = color_list[i]
-
-        else:
-            if result < colormath.color_diff.delta_e_cie2000(lab_webtoon_color, lab_ks_color, 1, 1, 1):
-                result = colormath.color_diff.delta_e_cie2000(lab_webtoon_color, lab_ks_color, 1, 1, 1)
-                result_color = color_list[i]
-
-    print("result_color: ", result_color)
-    print("final_result: ", result)
-    return result_color
-
-
 def remove_blanks(a_list):
     new_list = []
     for item in a_list:
@@ -504,7 +460,7 @@ def get_dict_from_csv():
     font_name = "AppleGothic"
     rc('font', family=font_name)
 
-    json_csv = pd.read_csv("json3.csv")
+    json_csv = pd.read_csv("json4.csv")
     uniq_title = pd.unique(json_csv['title'])
     title = json_csv['title']
     episode_id = json_csv["episode_id"]
@@ -668,10 +624,10 @@ if __name__ == '__main__':
     authentication = firebase.FirebaseAuthentication(SECRET, None, False, False)  # image_kmeans(e_dict.get(32022))
     firebase = firebase.FirebaseApplication(DSN, authentication)
 
-    # firebase.put('/analysis', 'test', 'data')
+    # firebase.put('/result2', 'test', 'data')
     title_ep_dict = get_dict_from_csv()
     #
-    color_db = firebase.get('/analysis', None)
+    color_db = firebase.get('/result2', None)
     xy_dict = get_xy_dict()
     episodes = []
     colors = []
@@ -690,10 +646,10 @@ if __name__ == '__main__':
                 result = {
                     str(e): json
                 }
-                colors.append(json)
+                colors.append(result)
                 # episodes.append(e.key())
             if (color_db is not None) and (color_db.get(t) is None):
-                firebase.put('/analysis', t, colors)
+                firebase.put('/result2', t, colors)
             else:
                 print(t + 'already exists')
             colors.clear()
